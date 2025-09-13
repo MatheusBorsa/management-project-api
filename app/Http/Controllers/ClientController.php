@@ -53,4 +53,28 @@ class ClientController extends Controller
             );
         }
     }
+
+    public function show($id)
+    {
+        try {
+            $client = Client::with(['users' => function ($query) {
+                $query->select('users.id', 'users.name', 'users.email')
+                    ->withPivot('role');
+            }])->findOrFail($id);
+
+            return ApiResponseUtil::success(
+                'Client retrieved successfully',
+                $client,
+                200
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Error retrieving client',
+                ['error' => $e->getMessage()],
+                500
+            );
+
+        }
+    }
 }

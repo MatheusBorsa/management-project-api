@@ -20,12 +20,12 @@ Route::middleware('auth:sanctum')->group(function() {
 
 //Clients
 Route::middleware('auth:sanctum')->group(function() {
-    Route::post('/clients', [ClientController::class, 'addClient']);
+    Route::post('/clients', [ClientController::class, 'addClients']);
+    Route::get('/clients/{id}', [ClientController::class, 'show']);
 });
 
 /*
 GET	    /clients	                    List all clients for the logged-in user
-POST	/clients	                    Create a new client
 GET	    /clients/{id}	                Show client details
 PATCH	/clients/{id}	                Update client info
 DELETE	/clients/{id}	                Delete a client
