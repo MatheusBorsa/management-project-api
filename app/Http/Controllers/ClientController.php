@@ -9,6 +9,7 @@ use Illuminate\Validation\ValidationException;
 use App\Utils\ApiResponseUtil;
 use App\Enums\ClientUserRole;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ClientController extends Controller
 {
@@ -99,6 +100,38 @@ class ClientController extends Controller
                 'Error retrieving clients',
                 ['error' => $e->getMessage()],
                 500
+            );
+        }
+    }
+
+    public function editClient(Request $request, $id)
+    {
+        try {
+            $user = $request->user();
+
+            $client = $user->clients()->findOrFail($id);
+
+            $validatedData = $request->validate([
+                'name' => 'sometimes|required|string|max:255',
+                'contact_name' => 'sometimes|nullable|string|max:255',
+                'email' => 'sometimes|required|email|max:255',
+                'phone' => 'sometimes|required|string|max:30',
+                'notes' => 'sometimes|required|string'
+            ]);
+
+            $client->update($validatedData);
+
+            return ApiResponseUtil::success(
+                'Client updated successfully',
+                $client,
+                200
+            );
+
+        } catch (ModelNotFoundException $e) {
+            return ApiResponseUtil::error(
+                'Client not found or access denied',
+                ['error' => $e->getMessage()],
+                404
             );
         }
     }
