@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('client_id');
             $table->foreignId('user_id');
-            $table->string('role')->default('user');
+            $table->string('role')->default(\App\Enums\ClientUserRole::PARTICIPANT->value);
             $table->timestamps();
         });
     }
