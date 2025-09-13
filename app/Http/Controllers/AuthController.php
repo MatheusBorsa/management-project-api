@@ -25,7 +25,11 @@ class AuthController extends Controller
                 ],
             ]);
 
-            $user = User::create($validatedData);
+            $user = User::create([
+                'name' => $validatedData['name'],
+                'email' => $validatedData['email'],
+                'password' => $validatedData['password']
+            ]);
 
             $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -44,6 +48,7 @@ class AuthController extends Controller
                 $e->errors(),
                 422
             );
+
         } catch (Exception $e) {
             return ApiResponseUtil::error(
                 'Server Error',

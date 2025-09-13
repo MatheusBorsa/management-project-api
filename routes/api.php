@@ -2,11 +2,13 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+Route::post('/auth/register', [AuthController::class, 'register']);
 /*
 POST	/auth/register	Create a new user
 POST	/auth/login	    Authenticate and return token
@@ -34,4 +36,4 @@ DELETE	/tasks/{id}	                Delete a task
 PATCH	/tasks/{id}/status	        Update only the status of a task
 
 GET /tasks/{id}/history Get history for a task   
-*/
+*/  
