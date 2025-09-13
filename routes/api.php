@@ -15,10 +15,11 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function() {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 });
+
+Route::middleware('auth:sanctum')->group(function() {
+    Route::get('/auth/me', [AuthController::class, 'me']);
+});
 /*
-POST	/auth/register	Create a new user
-POST	/auth/login	    Authenticate and return token
-POST	/auth/logout	Logout user
 GET	    /auth/me	    Get current logged-in user info
 
 GET	    /clients/{clientId}/users	    List users assigned to this client

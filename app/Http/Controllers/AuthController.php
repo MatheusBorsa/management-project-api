@@ -120,4 +120,34 @@ class AuthController extends Controller
             );
         }
     }
+
+    public function me(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            if (!$user) {
+                return ApiResponseUtil::error(
+                    'User not authenticated',
+                    null,
+                    401
+                );
+            }
+
+            return ApiResponseUtil::success(
+                'User retrieved successfully',
+                [
+                    'user' => $user
+                ],
+                200
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Server Error',
+                ['error' => $e->getMessage()],
+                500
+            );
+        }
+    }
 }
