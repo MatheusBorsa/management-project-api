@@ -77,4 +77,29 @@ class ClientController extends Controller
 
         }
     }
+
+    public function showAll(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            $clients = $user->clients()->with(['users' => function ($query) {
+                $query->select('users.id', 'users.name', 'users.email')
+                    ->withPivot('role');
+            }])->get();
+
+            return ApiResponseUtil::success(
+                'Clients retrieved successfully',
+                $clients,
+                200
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Error retrieving clients',
+                ['error' => $e->getMessage()],
+                500
+            );
+        }
+    }
 }

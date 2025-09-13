@@ -22,11 +22,11 @@ Route::middleware('auth:sanctum')->group(function() {
 Route::middleware('auth:sanctum')->group(function() {
     Route::post('/clients', [ClientController::class, 'addClients']);
     Route::get('/clients/{id}', [ClientController::class, 'show']);
+    Route::get('/clients', [ClientController::class, 'showAll']);
 });
 
 /*
 GET	    /clients	                    List all clients for the logged-in user
-GET	    /clients/{id}	                Show client details
 PATCH	/clients/{id}	                Update client info
 DELETE	/clients/{id}	                Delete a client
 POST	/clients/{id}/users	            Attach user to client (with role)
