@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Utils\ApiResponseUtil;
 use App\Utils\PasswordValidatorUtil;
@@ -56,5 +57,67 @@ class AuthController extends Controller
                 500
             );
         }
-    }    
+    }
+    
+    public function login(Request $request)
+    {
+        try {
+            $request->validate([
+                'email' => 'required|string|email',
+                'password' => 'required|string'
+            ]);
+
+            $user = User::where('email', $request->email)->first();
+
+            if (!$user || !Hash::check($request->password, $user->password)) {
+                throw ValidationException::withMessages([
+                    'email' => ['The provided credential are invalid.']
+                ]);
+            }
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return ApiResponseUtil::success(
+                'Login successful',
+                [
+                    'user' => $user,
+                    'token' => $token
+                ],
+            );
+
+        } catch (ValidationException $e){
+            return ApiResponseUtil::error(
+                'Authentication Error',
+                $e->errors(),
+                401
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Server Error',
+                ['error' => $e->getMessage()],
+                500
+            );
+        }
+    }
+
+    public function logout(Request $request)
+    {
+        try {
+            $request->user()->currentAccessToken()->delete();
+
+            return ApiResponseUtil::success(
+                'Logged out succesfully',
+                null,
+                200
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Server Error',
+                ['error' => $e->getMessage()],
+                500
+            );
+        }
+    }
 }

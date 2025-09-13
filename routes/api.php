@@ -9,6 +9,12 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::post('/auth/register', [AuthController::class, 'register']);
+
+Route::post('/auth/login', [AuthController::class, 'login']);
+
+Route::middleware('auth:sanctum')->group(function() {
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
+});
 /*
 POST	/auth/register	Create a new user
 POST	/auth/login	    Authenticate and return token

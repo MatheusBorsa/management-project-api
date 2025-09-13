@@ -19,7 +19,6 @@ return new class extends Migration
             $table->timestamp('due_date')->nullable();
             $table->string('status')->default('todo');
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
