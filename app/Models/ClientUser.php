@@ -14,6 +14,10 @@ class ClientUser extends Pivot
         'role'
     ];
 
+    protected $casts = [
+        'role' => ClientUsersRole::class
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

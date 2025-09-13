@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Enum\ClientUserRole;
 
 return new class extends Migration
 {
@@ -15,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('client_id');
             $table->foreignId('user_id');
-            $table->string('role')->default(\App\Enums\ClientUserRole::PARTICIPANT->value);
+            $table->string('role')->default(ClientUserRole::PARTICIPANT->value);
             $table->timestamps();
         });
     }
