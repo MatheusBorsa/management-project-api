@@ -135,4 +135,35 @@ class ClientController extends Controller
             );
         }
     }
+
+    public function removeClient(Request $request, $id)
+    {
+        try {
+            $user = $request->user();
+
+            $client = $user->clients()->findOrFail($id);
+
+            $client->delete();
+
+            return ApiResponseUtil::success(
+                'Client removed successfully',
+                null,
+                200
+            );
+
+        } catch (ModelNotFoundException $e) {
+            return ApiResponseUtil::error(
+                'Client not found',
+                ['error' => $e->getMessage()],
+                404
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Error removing client',
+                ['error' => $e->getMessage()],
+                500
+            );   
+        }
+    }
 }
