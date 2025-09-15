@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ClientInvitationController;
+
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -25,6 +27,11 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::get('/clients', [ClientController::class, 'showAll']);
     Route::put('/clients/{id}', [ClientController::class, 'editClient']);
     Route::delete('/clients/{id}', [ClientController::class, 'removeClient']);
+});
+
+Route::middleware('auth:sanctum')->group(function() {
+    Route::post('/client/{client}/invite', [ClientInvitationController::class, 'sendInvitation'])
+        ->name('client.invitation.send');
 });
 
 /*
