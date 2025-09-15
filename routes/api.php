@@ -27,20 +27,16 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::get('/clients', [ClientController::class, 'showAll']);
     Route::put('/clients/{id}', [ClientController::class, 'editClient']);
     Route::delete('/clients/{id}', [ClientController::class, 'removeClient']);
+    Route::get('/clients/{id}/users', [ClientController::class, 'showCollaborators']);
 });
 
 Route::middleware('auth:sanctum')->group(function() {
-    Route::post('/client/{client}/invite', [ClientInvitationController::class, 'sendInvitation'])
+    Route::post('/client/{id}/invite', [ClientInvitationController::class, 'sendInvitation'])
         ->name('client.invitation.send');
 });
 
 /*
-DELETE	/clients/{id}	                Delete a client
-POST	/clients/{id}/users	            Attach user to client (with role)
-DELETE	/clients/{id}/users/{userId}	Detach user from client
-
 GET	    /clients/{clientId}/users	    List users assigned to this client
-POST	/clients/{clientId}/users	    Attach user to client (with role)
 PATCH	/clients/{clientId}/users/{id}	Update role of a user in this client
 DELETE	/clients/{clientId}/users/{id}	Remove user from client
 

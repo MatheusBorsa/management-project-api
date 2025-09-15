@@ -166,4 +166,31 @@ class ClientController extends Controller
             );   
         }
     }
+
+    public function showCollaborators(Request $request, $id)
+    {
+        try {
+            $client = Client::with('users')->findOrFail($id);
+
+            if (!$client->users->contains($request->user()->id)) {
+                return ApiResponseUtil::error(
+                    'Unauthorized',
+                    null,
+                    403
+                );
+            }
+
+            return ApiResponseUtil::success(
+                'Retrieved collaborators successfully',
+                ['users' => $client->users]
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Error fetching client collaborators',
+                ['error' => $e->getMessage()],
+                500
+            );
+        }
+    }
 }

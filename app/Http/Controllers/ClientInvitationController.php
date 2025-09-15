@@ -16,7 +16,7 @@ use App\Utils\ApiResponseUtil;
 
 class ClientInvitationController extends Controller
 {
-    public function sendInvitation(Request $request, $clientId)
+    public function sendInvitation(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
@@ -38,7 +38,7 @@ class ClientInvitationController extends Controller
             $client = Client::with(['users' => function ($query) use ($currentUser) {
                 $query->where('user_id', $currentUser->id)
                       ->select('users.id', 'users.name', 'users.email');
-            }])->findOrFail($clientId);
+            }])->findOrFail($id);
 
             $currentUserPivot = $client->users->first();
             if (!$currentUserPivot || $currentUserPivot->pivot->role !== ClientUserRole::OWNER->value) {
@@ -53,7 +53,7 @@ class ClientInvitationController extends Controller
 
             if ($invitedUser) {
                 $isAlreadyAssociated = $invitedUser->clients()
-                    ->where('client_id', $clientId)
+                    ->where('client_id', $id)
                     ->exists();
                     
                 if ($isAlreadyAssociated) {
@@ -95,7 +95,7 @@ class ClientInvitationController extends Controller
     public function acceptInvitation(Request $request): JsonResponse
     {
         try {
-            $clientId = $request->get('client');
+            $id = $request->get('client');
             $email = $request->get('email');
             $role = $request->get('role');
 
@@ -107,16 +107,16 @@ class ClientInvitationController extends Controller
                     'message' => 'Please create an account first',
                     'redirect_to_registration' => true,
                     'invitation_data' => [
-                        'client_id' => $clientId,
+                        'client_id' => $id,
                         'email' => $email,
                         'role' => $role
                     ]
                 ], 302);
             }
 
-            $client = Client::findOrFail($clientId);
+            $client = Client::findOrFail($id);
 
-            $existingAssociation = $user->clients()->where('client_id', $clientId)->exists();
+            $existingAssociation = $user->clients()->where('client_id', $id)->exists();
             
             if ($existingAssociation) {
                 return response()->json([
@@ -125,7 +125,7 @@ class ClientInvitationController extends Controller
                 ], 409);
             }
 
-            $user->clients()->attach($clientId, [
+            $user->clients()->attach($id, [
                 'role' => $role,
                 'created_at' => now(),
                 'updated_at' => now()
