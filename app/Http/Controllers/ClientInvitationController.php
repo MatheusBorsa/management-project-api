@@ -35,19 +35,19 @@ class ClientInvitationController extends Controller
             $currentUser = auth()->user();
             $invitedUserEmail = $request->email;
 
-            $client = Client::with(['users' => function ($query) use ($currentUser) {
-                $query->where('user_id', $currentUser->id)
-                      ->select('users.id', 'users.name', 'users.email');
-            }])->findOrFail($id);
+            $currentUserPivot = $currentUser->clients()
+                ->where('client_id', $id)
+                ->first();
 
-            $currentUserPivot = $client->users->first();
             if (!$currentUserPivot || $currentUserPivot->pivot->role !== ClientUserRole::OWNER->value) {
                 return ApiResponseUtil::error(
-                    'You do not have permission to invite users to collaborate',
+                    'You are not authorized',
                     null,
                     403
                 );
             }
+
+            $client = Client::findOrFail($id);
 
             $invitedUser = User::whereEmail($invitedUserEmail)->first();
 

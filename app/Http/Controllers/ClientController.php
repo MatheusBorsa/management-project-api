@@ -129,7 +129,7 @@ class ClientController extends Controller
 
         } catch (ModelNotFoundException $e) {
             return ApiResponseUtil::error(
-                'Client not found or access denied',
+                'Client not found',
                 ['error' => $e->getMessage()],
                 404
             );
@@ -171,8 +171,8 @@ class ClientController extends Controller
     {
         try {
             $client = Client::with('users')->findOrFail($id);
-
-            if (!$client->users->contains($request->user()->id)) {
+            $isMember = $client->users()->where('users.id', $request->user()->id)->exists();
+            if (!$isMember) {
                 return ApiResponseUtil::error(
                     'Unauthorized',
                     null,
@@ -187,7 +187,7 @@ class ClientController extends Controller
 
         } catch (Exception $e) {
             return ApiResponseUtil::error(
-                'Error fetching client collaborators',
+                'Error retrieving client collaborators',
                 ['error' => $e->getMessage()],
                 500
             );
