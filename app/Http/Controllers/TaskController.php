@@ -14,16 +14,30 @@ use Illuminate\Validation\ValidationException;
 
 
 class TaskController extends Controller
-{
+{   
+    private function checkTaskPermission($taskOrClient, $user, array $allowedRoles = ['owner', 'participant'])
+    {
+        if ($taskOrClient instanceof Client) {
+            $client = $taskOrClient;
+        } else {
+            $client = $taskOrClient->client;
+        }
+        
+        $pivot = $client->users->firstWhere('id', $user->id)?->pivot;
+
+        if (!$pivot || !in_array($pivot->role, $allowedRoles)) {
+            return false;
+        }
+        return true;
+    }
+
     public function createTask(Request $request, $clientId)
     {
         try {
             $currentUser = $request->user();
-
             $client = Client::with('users')->findOrFail($clientId);
 
-            $pivot = $client->users->firstWhere('id', $currentUser->id)?->pivot;
-            if (!$pivot) {
+            if (!$this->checkTaskPermission($client, $currentUser)) {
                 return ApiResponseUtil::error(
                     'You are not authorized',
                     null,
@@ -63,8 +77,7 @@ class TaskController extends Controller
 
             $task = Task::with('client.users')->findOrFail($id);
 
-            $pivot = $task->client->users->firstWhere('id', $currentUser->id)?->pivot;
-            if (!$pivot) {
+            if (!$this->checkTaskPermission($task, $currentUser)) {
                 return ApiResponseUtil::error(
                     'You are not authorized',
                     null,
@@ -136,6 +149,45 @@ class TaskController extends Controller
         } catch (Exception $e) {
             return ApiResponseUtil::error(
                 'Failed to retrieve task',
+                ['error' => $e->getMessage()],
+                500
+            );
+        }
+    }
+
+    public function deleteTask(Request $request, $id)
+    {
+        try {
+            $currentUser = $request->user();
+
+            $task = Task::with('client.users')->findOrFail($id);
+
+            if (!$this->checkTaskPermission($task, $currentUser)) {
+                return ApiResponseUtil::error(
+                    'You are not authorized',
+                    null,
+                    403
+                );
+            }
+
+            $task->delete();
+
+            return ApiResponseUtil::success(
+                'Task removed successfully',
+                null,
+                200
+            );
+            
+        } catch (ModelNotFoundException $e) {
+            return ApiResponseUtil::error(
+                'Task not found',
+                ['error' => $e->getMessage()],
+                404
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Failed to remove task',
                 ['error' => $e->getMessage()],
                 500
             );
