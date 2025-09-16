@@ -42,14 +42,11 @@ Route::middleware('auth:sanctum')->group(function() {
 Route::middleware('auth:sanctum')->group(function() {
     Route::post('/clients/{clientId}/tasks', [TaskController::class, 'createTask']);
     Route::put('/tasks/{id}', [TaskController::class, 'updateTask']);
+    Route::get('/tasks/{id}', [TaskController::class, 'showTask']);
 });
 
 /*
-PATCH	/tasks/{id}	                Update task (title, desc, due_date, status)
-GET	    /tasks/{id}	                Show task details
 DELETE	/tasks/{id}	                Delete a task
-
 GET	    /clients/{clientId}/tasks	List all tasks for a client
-
 GET /tasks/{id}/history Get history for a task   
 */  

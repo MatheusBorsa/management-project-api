@@ -110,4 +110,35 @@ class TaskController extends Controller
             );
         }
     }
+
+    public function showTask(Request $request, $id)
+    {
+        try {
+            $user = $request->user();
+
+            $task = Task::with('client.users', 'assignedUser')->findOrFail($id);
+
+            $pivot = $task->client->users->firstWhere('id', $user->id)?->pivot;
+            if (!$pivot) {
+                return ApiResponseUtil::error(
+                    'You are not authorized',
+                    null,
+                    403
+                );
+            }
+
+            return ApiResponseUtil::success(
+                'Task retrieved successfully',
+                new TaskResource($task),
+                200
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Failed to retrieve task',
+                ['error' => $e->getMessage()],
+                500
+            );
+        }
+    }
 }
