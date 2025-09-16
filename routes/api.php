@@ -41,15 +41,15 @@ Route::middleware('auth:sanctum')->group(function() {
 //Tasks
 Route::middleware('auth:sanctum')->group(function() {
     Route::post('/clients/{clientId}/tasks', [TaskController::class, 'createTask']);
+    Route::put('/tasks/{id}', [TaskController::class, 'updateTask']);
 });
+
 /*
-POST	/clients/{clientId}/tasks	Create a task for a client
 PATCH	/tasks/{id}	                Update task (title, desc, due_date, status)
 GET	    /tasks/{id}	                Show task details
 DELETE	/tasks/{id}	                Delete a task
 
 GET	    /clients/{clientId}/tasks	List all tasks for a client
-PATCH	/tasks/{id}/status	        Update only the status of a task
 
 GET /tasks/{id}/history Get history for a task   
 */  
