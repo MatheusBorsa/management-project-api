@@ -71,7 +71,7 @@ class ClientInvitation extends Model
         return $this->update(['status' => 'declined']);
     }
 
-    public function boot()
+    protected static function boot()
     {
         parent::boot();
 

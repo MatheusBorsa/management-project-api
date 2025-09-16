@@ -34,8 +34,7 @@ Route::middleware('auth:sanctum')->group(function() {
 });
 
 Route::middleware('auth:sanctum')->group(function() {
-    Route::post('/client/{id}/invite', [ClientInvitationController::class, 'sendInvitation'])
-        ->name('client.invitation.send');
+    Route::post('/clients/{clientId}/invitations', [ClientInvitationController::class, 'sendInvitation']);
 });
 
 //Tasks

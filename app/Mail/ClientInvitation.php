@@ -4,63 +4,38 @@ namespace App\Mail;
 
 use App\Models\Client;
 use App\Models\User;
-use Illuminate\Bus\Queueable;
+use App\Models\ClientInvitation as ClientInvitationModel;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\URL;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-class ClientInvitation extends Mailable
+class ClientInvitation extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels;
+    use SerializesModels;
 
-    public Client $client;
-    public User $invitedBy;
-    public string $role;
-    public string $invitedEmail;
-    public string $acceptUrl;
+    public function __construct(
+        public Client $client,
+        public User $invitedBy,
+        public string $role,
+        public string $invitedEmail,
+        public ?ClientInvitationModel $invitation = null
+    ) {}
 
-    public function __construct(Client $client, User $invitedBy, string $role, string $invitedEmail)
+    public function build()
     {
-        $this->client = $client;
-        $this->invitedBy = $invitedBy;
-        $this->role = $role;
-        $this->invitedEmail = $invitedEmail;
+        $acceptUrl = $this->invitation 
+            ? config('app.frontend_url') . '/invitations/' . $this->invitation->token
+            : config('app.frontend_url') . '/register?email=' . urlencode($this->invitedEmail);
 
-        $this->acceptUrl = URL::temporarySignedRoute(
-            'client.invitation.accept',
-            now()->addDays(7),
-            [
-                'client' => $client->id,
-                'email' => $invitedEmail,
-                'role' => $role
-            ]
-        );
-    }
-
-    public function envelope()
-    {
-        return new Envelope(
-            subject: "You've been invited to collaborate on {$this->client->name}"
-        );
-    }
-
-    public function content()
-    {
-        return new Content(
-            view: 'emails.client-invitation',
-            with: [
-                'client' => $this->client,
-                'invitedBy' => $this->invitedBy,
-                'role' => $this->role,
-                'acceptUrl' => $this->acceptUrl
-            ],
-        );
-    }
-
-    public function attachments()
-    {
-        return [];
+        return $this->subject("You're invited to collaborate on {$this->client->name}")
+                    ->view('emails.client-invitation')
+                    ->with([
+                        'clientName' => $this->client->name,
+                        'inviterName' => $this->invitedBy->name,
+                        'role' => $this->role,
+                        'invitedEmail' => $this->invitedEmail,
+                        'acceptUrl' => $acceptUrl,
+                        'expiresAt' => $this->invitation?->expires_at
+                    ]);
     }
 }
