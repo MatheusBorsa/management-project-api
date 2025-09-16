@@ -254,4 +254,51 @@ class ClientController extends Controller
             );
         }
     }
+
+    public function removeCollaborator(Request $request, $clientId, $userId)
+    {
+        try {
+            $currentUser = $request->user();
+
+            $client = Client::with('users')->findOrFail($clientId);
+
+            $currentUserPivot = $client->users->firstWhere('id', $currentUser->id)?->pivot;
+
+            if(!$currentUserPivot || (string) $currentUserPivot->role !== (string) ClientUserRole::OWNER->value) {
+                return ApiResponseUtil::error(
+                    'You are not authorized',
+                    null,
+                    403
+                );
+            }
+
+            $targetUserPivot = $client->users->firstWhere('id', $userId)?->pivot;
+
+            if (!$targetUserPivot) {
+                return ApiResponseUtil::error(
+                    'User not found',
+                    null,
+                    404
+                );
+            }
+
+            $client->users()->detach($userId);
+
+            return ApiResponseUtil::success(
+                'User removed from client successfully',
+                [
+                    'client_id' => $clientId,
+                    'removed_user_id' => $userId
+                ],
+                200
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Failed to remove user from client',
+                ['error' => $e->getMessage()],
+                500
+            );
+        }
+    }
 }

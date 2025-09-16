@@ -29,6 +29,7 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::delete('/clients/{id}', [ClientController::class, 'removeClient']);
     Route::get('/clients/{id}/users', [ClientController::class, 'showCollaborators']);
     Route::put('/clients/{clientId}/users/{userId}', [ClientController::class, 'updateUserRole']);
+    Route::delete('/clients/{clientId}/users/{userId}', [ClientController::class, 'removeCollaborator']);
 });
 
 Route::middleware('auth:sanctum')->group(function() {
@@ -36,15 +37,13 @@ Route::middleware('auth:sanctum')->group(function() {
         ->name('client.invitation.send');
 });
 
-/*   
-PATCH	/clients/{clientId}/users/{id}	Update role of a user in this client
-DELETE	/clients/{clientId}/users/{id}	Remove user from client
+/*
+POST	/clients/{clientId}/tasks	Create a task for a client
+PATCH	/tasks/{id}	                Update task (title, desc, due_date, status)
+GET	    /tasks/{id}	                Show task details
+DELETE	/tasks/{id}	                Delete a task
 
 GET	    /clients/{clientId}/tasks	List all tasks for a client
-POST	/clients/{clientId}/tasks	Create a task for a client
-GET	    /tasks/{id}	                Show task details
-PATCH	/tasks/{id}	                Update task (title, desc, due_date, status)
-DELETE	/tasks/{id}	                Delete a task
 PATCH	/tasks/{id}/status	        Update only the status of a task
 
 GET /tasks/{id}/history Get history for a task   
