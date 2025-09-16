@@ -44,10 +44,5 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::put('/tasks/{id}', [TaskController::class, 'updateTask']);
     Route::get('/tasks/{id}', [TaskController::class, 'showTask']);
     Route::delete('/tasks/{id}', [TaskController::class, 'deleteTask']);
+    Route::get('/clients/{clientId}/tasks', [TaskController::class, 'getAllTasks']);
 });
-
-/*
-DELETE	/tasks/{id}	                Delete a task
-GET	    /clients/{clientId}/tasks	List all tasks for a client
-GET /tasks/{id}/history Get history for a task   
-*/  
