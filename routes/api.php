@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::put('/clients/{id}', [ClientController::class, 'editClient']);
     Route::delete('/clients/{id}', [ClientController::class, 'removeClient']);
     Route::get('/clients/{id}/users', [ClientController::class, 'showCollaborators']);
+    Route::put('/clients/{clientId}/users/{userId}', [ClientController::class, 'updateUserRole']);
 });
 
 Route::middleware('auth:sanctum')->group(function() {
@@ -35,8 +36,7 @@ Route::middleware('auth:sanctum')->group(function() {
         ->name('client.invitation.send');
 });
 
-/*
-GET	    /clients/{clientId}/users	    List users assigned to this client
+/*   
 PATCH	/clients/{clientId}/users/{id}	Update role of a user in this client
 DELETE	/clients/{clientId}/users/{id}	Remove user from client
 

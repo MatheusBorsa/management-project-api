@@ -193,4 +193,65 @@ class ClientController extends Controller
             );
         }
     }
+
+    public function updateUserRole(Request $request, $clientId, $userId)
+    {
+        try {
+            $validated = $request->validate([
+                'role' => 'required|string|in:' . implode(',', array_column(ClientUserRole::cases(), 'value'))
+            ]);
+
+            $currentUser = $request->user();
+
+            $client = Client::findOrFail($clientId);
+
+            $client = Client::with('users')->findOrFail($clientId);
+
+            $pivot = $client->users->firstWhere('id', $currentUser->id)?->pivot;
+
+            if (!$pivot || (string) $pivot->role !== (string) ClientUserRole::OWNER->value) {
+                return ApiResponseUtil::error(
+                    'You are not authorized',
+                    null,
+                    403
+                );
+            }
+
+            $targetUser = $client->users()->where('users.id', $userId)->first();
+
+            if (!$targetUser) {
+                return ApiResponseUtil::error(
+                    'User not found',
+                    null,
+                    404
+                );
+            }
+
+            $client->users()->updateExistingPivot($userId, [
+                'role' => $validated['role'],
+                'updated_at' => now()
+            ]);
+
+            return ApiResponseUtil::success(
+                'User role updated successfully',
+                [
+                'client' => $client->name,
+                'user' => [
+                    'id' => $targetUser->id,
+                    'name' => $targetUser->name,
+                    'email' => $targetUser->email,
+                    'role' => $validated['role']
+                    ]
+                ],
+                200
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Failed to update user role',
+                ['error' => $e->getMessage()],
+                500
+            );
+        }
+    }
 }
