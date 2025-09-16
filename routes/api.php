@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ClientInvitationController;
+use App\Http\Controllers\TaskController;
 
 
 Route::get('/user', function (Request $request) {
@@ -37,6 +38,10 @@ Route::middleware('auth:sanctum')->group(function() {
         ->name('client.invitation.send');
 });
 
+//Tasks
+Route::middleware('auth:sanctum')->group(function() {
+    Route::post('/clients/{clientId}/tasks', [TaskController::class, 'createTask']);
+});
 /*
 POST	/clients/{clientId}/tasks	Create a task for a client
 PATCH	/tasks/{id}	                Update task (title, desc, due_date, status)
