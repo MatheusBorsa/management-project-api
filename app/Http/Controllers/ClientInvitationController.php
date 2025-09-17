@@ -23,7 +23,7 @@ class ClientInvitationController extends Controller
             ->wherePivot('role', ClientUserRole::OWNER->value)
             ->exists();
     }
-    public function sendInvitation(Request $request, $clientId)
+    public function store(Request $request, $clientId)
     {
         $request->validate([
             'email' => 'required|email',
@@ -110,7 +110,7 @@ class ClientInvitationController extends Controller
         }
     }
 
-    public function showInvitation(string $token)
+    public function show(string $token)
     {
         try {
             $invitation = ClientInvitation::with(['client', 'invitedBy'])
@@ -162,7 +162,7 @@ class ClientInvitationController extends Controller
         }
     }
 
-    public function acceptInvitation(Request $request, string $token)
+    public function accept(Request $request, string $token)
     {
         try {
             DB::beginTransaction();
@@ -236,7 +236,7 @@ class ClientInvitationController extends Controller
         }
     }
 
-    public function declineInvitation(string $token)
+    public function decline(string $token)
     {
         try {
             $invitation = ClientInvitation::where('token', $token)->firstOrFail();
@@ -272,7 +272,7 @@ class ClientInvitationController extends Controller
         }
     }
 
-    public function getClientInvitations(Request $request, $clientId)
+    public function index(Request $request, $clientId)
     {
         try {
             $user = $request->user();
@@ -317,7 +317,7 @@ class ClientInvitationController extends Controller
         }
     }
 
-    public function resendInvitation(Request $request, $invitationId)
+    public function resend(Request $request, $invitationId)
     {
         try {
             $user = $request->user();
@@ -362,7 +362,7 @@ class ClientInvitationController extends Controller
         }
     }
 
-    public function cancelInvitation(Request $request, $invitationId)
+    public function destroy(Request $request, $invitationId)
     {
         try {
             $user = $request->user();

@@ -121,7 +121,7 @@ class AuthController extends Controller
         }
     }
 
-    public function me(Request $request)
+    public function show(Request $request)
     {
         try {
             $user = $request->user();

@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ClientController extends Controller
 {
-    public function addClient(Request $request)
+    public function store(Request $request)
     {
         try {
             $validatedData = $request->validate([
@@ -79,7 +79,7 @@ class ClientController extends Controller
         }
     }
 
-    public function showAll(Request $request)
+    public function index(Request $request)
     {
         try {
             $user = $request->user();
@@ -104,7 +104,7 @@ class ClientController extends Controller
         }
     }
 
-    public function editClient(Request $request, $id)
+    public function update(Request $request, $id)
     {
         try {
             $user = $request->user();
@@ -136,7 +136,7 @@ class ClientController extends Controller
         }
     }
 
-    public function removeClient(Request $request, $id)
+    public function destroy(Request $request, $id)
     {
         try {
             $user = $request->user();
@@ -167,7 +167,7 @@ class ClientController extends Controller
         }
     }
 
-    public function showCollaborators(Request $request, $id)
+    public function users(Request $request, $id)
     {
         try {
             $client = Client::with('users')->findOrFail($id);
@@ -194,7 +194,7 @@ class ClientController extends Controller
         }
     }
 
-    public function updateUserRole(Request $request, $clientId, $userId)
+    public function updateUser(Request $request, $clientId, $userId)
     {
         try {
             $validated = $request->validate([
@@ -255,7 +255,7 @@ class ClientController extends Controller
         }
     }
 
-    public function removeCollaborator(Request $request, $clientId, $userId)
+    public function removeUser(Request $request, $clientId, $userId)
     {
         try {
             $currentUser = $request->user();

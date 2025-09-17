@@ -32,7 +32,7 @@ class TaskController extends Controller
         return true;
     }
 
-    public function createTask(Request $request, $clientId)
+    public function store(Request $request, $clientId)
     {
         try {
             $currentUser = $request->user();
@@ -71,7 +71,7 @@ class TaskController extends Controller
         }
     }
 
-    public function updateTask(Request $request, $id)
+    public function update(Request $request, $id)
     {
         try {
             $currentUser = $request->user();
@@ -158,7 +158,7 @@ class TaskController extends Controller
         }
     }
 
-    public function showTask(Request $request, $id)
+    public function show(Request $request, $id)
     {
         try {
             $user = $request->user();
@@ -189,7 +189,7 @@ class TaskController extends Controller
         }
     }
 
-    public function deleteTask(Request $request, $id)
+    public function destroy(Request $request, $id)
     {
         try {
             $currentUser = $request->user();
@@ -228,7 +228,7 @@ class TaskController extends Controller
         }
     }
 
-    public function getAllTasks(Request $request, $clientId)
+    public function index(Request $request, $clientId)
     {
         try {
             $currentUser = $request->user();
@@ -268,7 +268,7 @@ class TaskController extends Controller
         }
     }
 
-    public function getWeeklyTasks(Request $request)
+    public function weeklyCalendar(Request $request)
     {
         try {
             $user = $request->user();
