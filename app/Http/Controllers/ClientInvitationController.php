@@ -316,4 +316,49 @@ class ClientInvitationController extends Controller
             );
         }
     }
+
+    public function resendInvitation(Request $request, $invitationId)
+    {
+        try {
+            $user = $request->user();
+            $invitation = ClientInvitation::with('client', 'invitedBy')->findOrFail($invitationId);
+
+            if (!$this->isClientOwner($invitation->client, $user)) {
+                return ApiResponseUtil::error(
+                    'You are not authorized',
+                    null,
+                    403
+                );
+            }
+
+            if ($invitation->status !== 'pending') {
+                return ApiResponseUtil::error(
+                    'Can only resend pending invitations',
+                    null,
+                    400
+                );
+            }
+
+            $invitation->update(['expires_at' => now()->addDays(7)]);
+
+            Mail::to($invitation->email)->send(new ClientInvitationMail(
+                $invitation->client,
+                $invitation->invitedBy,
+                $invitation->client->user->role,
+                $invitation->email,
+                $invitation
+            ));
+
+            return ApiResponseUtil::success(
+                'Invitation resent successfully'
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Failed to resend invitation',
+                ['error' => $e->getMessage()],
+                500
+            );
+        }
+    }
 }

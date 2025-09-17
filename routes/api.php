@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::post('/clients/{clientId}/invitations', [ClientInvitationController::class, 'sendInvitation']);
     Route::post('/invitations/{token}/accept', [ClientInvitationController::class, 'acceptInvitation']);
     Route::get('/clients/{clientId}/invitations', [ClientInvitationController::class, 'getClientInvitations']);
+    Route::post('/invitations/{invitationId}/resend', [ClientInvitationController::class, 'resendInvitation']);
 });
 Route::get('/invitations/{token}', [ClientInvitationController::class, 'showInvitation']);
 Route::post('/invitations/{token}/decline', [ClientInvitationController::class, 'declineInvitation']);
