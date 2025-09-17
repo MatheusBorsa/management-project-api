@@ -109,4 +109,130 @@ class ClientInvitationController extends Controller
             );
         }
     }
+
+    public function showInvitation(string $token)
+    {
+        try {
+            $invitation = ClientInvitation::with(['client', 'invitedBy'])
+                ->where('token', $token)
+                ->firstOrFail();
+            
+            if ($invitation->isExpired()) {
+                return ApiResponseUtil::error(
+                    'Invitation has expired',
+                    null,
+                    410
+                );
+            }
+
+            if ($invitation->status !== 'pending') {
+                return ApiResponseUtil::error(
+                    'Invitation is no longer valid',
+                    null,
+                    410
+                );
+            }
+
+            return ApiResponseUtil::success(
+                'Invitation details retrieved',
+                [
+                    'id' => $invitation->id,
+                    'client' => [
+                        'id' => $invitation->client->id,
+                        'name' => $invitation->client->name,
+                        'description' => $invitation->client->description
+                    ],
+                    'invited_by' => [
+                        'name' => $invitation->invitedBy->name,
+                        'email' => $invitation->invitedBy->email
+                    ],
+                    'role' => $invitation->role,
+                    'email' => $invitation->email,
+                    'expires_at' => $invitation->expires_at,
+                    'status' => $invitation->status
+                ],
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Invitation not found',
+                null,
+                404
+            );
+        }
+    }
+
+    public function acceptInvitation(Request $request, string $token)
+    {
+        try {
+            DB::beginTransaction();
+
+            $invitation = ClientInvitation::with('client')
+                ->where('token', $token)
+                ->firstOrFail();
+
+            if ($invitation->isExpired()) {
+                return ApiResponseUtil::error(
+                    'Invitation has expired',
+                    null,
+                    410
+                );
+            }
+
+            if ($invitation->status !== 'pending') {
+                return ApiResponseUtil::error(
+                    'Invitation is no longer valid',
+                    null,
+                    410
+                );
+            }
+
+            $user = $request->user();
+
+            if ($user->email !== $invitation->email) {
+                return ApiResponseUtil::error(
+                    'This invitation was not sent to your email address',
+                    null,
+                    403
+                );
+            }
+
+            if ($user->clients()->where('client_id', $invitation->client_id)->exists()) {
+                return ApiResponseUtil::error(
+                    'You are already associated with this client',
+                    null,
+                    409
+                );
+            }
+
+            $user->clients()->attach($invitation->client_id, [
+                'role' => $invitation->role,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            $invitation->accept();
+
+            DB::commit();
+
+            return ApiResponseUtil::success(
+                'Successfully joined client collaboration',
+                [
+                    'client' => [
+                        'id' => $invitation->client->id,
+                        'name' =>$invitation->client->name
+                    ],
+                    'role' => $invitation->role
+                ]
+            );
+
+        } catch (Exception $e) {
+            DB::rollback();
+            return ApiResponseUtil::error(
+                'Failed to accept invitation',
+                ['error' => $e->getMessage()],
+                500
+            );
+        }
+    }
 }
