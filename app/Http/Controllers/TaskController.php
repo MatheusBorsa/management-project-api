@@ -124,6 +124,39 @@ class TaskController extends Controller
         }
     }
 
+    public function updateStatus(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'status' => 'required|in:' . implode(',', array_column(TaskStatus::cases(), 'value'))
+            ]);
+
+            $task = Task::findOrFail($id);
+
+            if (!$this->checkTaskPermission($task, $request->user())) {
+                return ApiResponseUtil::error(
+                    'You are not authorized',
+                    null,
+                    403
+                );
+            }
+
+            $task->update(['status' => $request->status]);
+
+            return ApiResponseUtil::success(
+                'Status updated',
+                new TaskResource($task)
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Failed to update task status',
+                ['error' => $e->getMessage()],
+                500
+            );
+        }
+    }
+
     public function showTask(Request $request, $id)
     {
         try {
