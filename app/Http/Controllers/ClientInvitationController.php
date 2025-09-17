@@ -271,4 +271,49 @@ class ClientInvitationController extends Controller
             );
         }
     }
+
+    public function getClientInvitations(Request $request, $clientId)
+    {
+        try {
+            $user = $request->user();
+            $client = Client::findOrFail($clientId);
+
+            if (!$this->isClientOwner($client, $user)) {
+                return ApiResponseUtil::error(
+                    'You are not authorized',
+                    null,
+                    403
+                );
+            }
+
+            $invitations = ClientInvitation::with('invitedBy')
+                ->where('client_id', $clientId)
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(function ($invitation) {
+                    return [
+                        'id' => $invitation->id,
+                        'email' => $invitation->email,
+                        'role' => $invitation->role,
+                        'status' => $invitation->status,
+                        'invited_by' => $invitation->invitedBy->name,
+                        'created_at' => $invitation->created_at,
+                        'expires_at' => $invitation->expires_at,
+                        'is_expired' => $invitation->isExpired()
+                    ];
+                });
+
+            return ApiResponseUtil::success(
+                'Invitations retrieved successfuly',
+                $invitations
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Failed to retrieve invitations',
+                ['error' => $e->getMessage()],
+                500
+            );
+        }
+    }
 }
