@@ -235,4 +235,40 @@ class ClientInvitationController extends Controller
             );
         }
     }
+
+    public function declineInvitation(string $token)
+    {
+        try {
+            $invitation = ClientInvitation::where('token', $token)->firstOrFail();
+
+            if ($invitation->isExpired()) {
+                return ApiResponseUtil::error(
+                    'Invitation has expired',
+                    null,
+                    410
+                );
+            }
+
+            if ($invitation->status !== 'pending') {
+                return ApiResponseUtil::error(
+                    'Invitation is no longer valid',
+                    null,
+                    410
+                );
+            }
+
+            $invitation->decline();
+
+            return ApiResponseUtil::success(
+                'Invitation declined successfully'
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Invitation not found',
+                null,
+                404
+            );
+        }
+    }
 }

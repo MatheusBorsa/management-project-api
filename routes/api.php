@@ -33,11 +33,13 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::delete('/clients/{clientId}/users/{userId}', [ClientController::class, 'removeCollaborator']);
 });
 
+//Invitations
 Route::middleware('auth:sanctum')->group(function() {
     Route::post('/clients/{clientId}/invitations', [ClientInvitationController::class, 'sendInvitation']);
     Route::post('/invitations/{token}/accept', [ClientInvitationController::class, 'acceptInvitation']);
-    Route::get('/invitations/{token}', [ClientInvitationController::class, 'showInvitation']);
 });
+Route::get('/invitations/{token}', [ClientInvitationController::class, 'showInvitation']);
+Route::post('/invitations/{token}/decline', [ClientInvitationController::class, 'declineInvitation']);
 
 //Tasks
 Route::middleware('auth:sanctum')->group(function() {
