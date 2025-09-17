@@ -361,4 +361,41 @@ class ClientInvitationController extends Controller
             );
         }
     }
+
+    public function cancelInvitation(Request $request, $invitationId)
+    {
+        try {
+            $user = $request->user();
+            $invitation = ClientInvitation::with('client')->findOrFail($invitationId);
+            
+            if (!$this->isClientOwner($invitation->client, $user)) {
+                return ApiResponseUtil::error(
+                    'You are not authorized',
+                    null,
+                    403
+                );
+            }
+
+            if ($invitation->status !== 'pending') {
+                return ApiResponseUtil::error(
+                    'You can only cancel pending invitations',
+                    null,
+                    400
+                );
+            }
+            
+            $invitation->decline();
+
+            return ApiResponseUtil::success(
+                'Invitation cancelled successfully'
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Failed to cancel invitation',
+                ['error' => $e->getMessage()],
+                500
+            );
+        }
+    }
 }
