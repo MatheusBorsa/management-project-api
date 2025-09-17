@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ClientInvitationController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\DashboardController;
 
 
 Route::get('/user', function (Request $request) {
@@ -51,4 +52,9 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::get('/tasks/{id}', [TaskController::class, 'showTask']);
     Route::delete('/tasks/{id}', [TaskController::class, 'deleteTask']);
     Route::get('/clients/{clientId}/tasks', [TaskController::class, 'getAllTasks']);
+});
+
+//Dashboard
+Route::middleware('auth:sanctum')->group(function() {
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 });
