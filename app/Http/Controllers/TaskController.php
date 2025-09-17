@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Utils\ApiResponseUtil;
 use App\Enums\TaskStatus;
 use App\Models\Task;
+use Carbon\Carbon;
 use App\Http\Resources\TaskResource;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -261,6 +262,69 @@ class TaskController extends Controller
         } catch (Exception $e) {
             return ApiResponseUtil::error(
                 'Failed to retrieve tasks',
+                ['error' => $e->getMessage()],
+                500
+            );
+        }
+    }
+
+    public function getWeeklyTasks(Request $request)
+    {
+        try {
+            $user = $request->user();
+            
+            $startDate = $request->get('start_date') 
+                ? Carbon::parse($request->get('start_date'))->startOfWeek()
+                : Carbon::now()->startOfWeek();
+                
+            $endDate = $startDate->copy()->endOfWeek();
+            
+            $tasks = Task::where('assigned_to', $user->id)
+                ->where('deadline', '>=', $startDate)
+                ->where('deadline', '<=', $endDate)
+                ->with(['client:id,name'])
+                ->orderBy('deadline')
+                ->get();
+            
+            $tasksByDate = [];
+            for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
+                $dateKey = $date->format('Y-m-d');
+                $dayTasks = $tasks->filter(function ($task) use ($dateKey) {
+                    return $task->deadline && Carbon::parse($task->deadline)->format('Y-m-d') === $dateKey;
+                });
+                
+                $tasksByDate[] = [
+                    'date' => $dateKey,
+                    'day_name' => $date->format('l'),
+                    'day_short' => $date->format('D'),
+                    'day_number' => $date->format('j'),
+                    'is_today' => $date->isToday(),
+                    'tasks' => $dayTasks->map(function ($task) {
+                        return [
+                            'id' => $task->id,
+                            'title' => $task->title,
+                            'status' => $task->status,
+                            'client_name' => $task->client->name,
+                            'deadline' => $task->deadline,
+                            'time' => Carbon::parse($task->deadline)->format('H:i')
+                        ];
+                    })->values()
+                ];
+            }
+            
+            return ApiResponseUtil::success(
+                'Weekly tasks for calendar',
+                [
+                'week_start' => $startDate->format('Y-m-d'),
+                'week_end' => $endDate->format('Y-m-d'),
+                'current_week' => $startDate->isSameWeek(Carbon::now()),
+                'days' => $tasksByDate
+                ]
+            );
+            
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Failed to retrieve weekly tasks',
                 ['error' => $e->getMessage()],
                 500
             );

@@ -49,7 +49,8 @@ Route::post('/invitations/{token}/decline', [ClientInvitationController::class, 
 Route::middleware('auth:sanctum')->group(function() {
     Route::post('/clients/{clientId}/tasks', [TaskController::class, 'createTask']);
     Route::put('/tasks/{id}', [TaskController::class, 'updateTask']);
-    Route::patch('/tasks/{id}/status', [TaskController::class, 'updateStatus']);
+    Route::put('/tasks/{id}/status', [TaskController::class, 'updateStatus']);
+    Route::get('/tasks/calendar/week', [TaskController::class, 'getWeeklyTasks']);
     Route::get('/tasks/{id}', [TaskController::class, 'showTask']);
     Route::delete('/tasks/{id}', [TaskController::class, 'deleteTask']);
     Route::get('/clients/{clientId}/tasks', [TaskController::class, 'getAllTasks']);
